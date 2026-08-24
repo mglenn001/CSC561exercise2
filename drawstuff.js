@@ -158,10 +158,11 @@ function main() {
     var imagedata = context.createImageData(w,h);
  
     // Define a rectangle in 2D with colors and coords at corners
-    var ulc = new Color(255,0,0,255); // upper left corner color: red
-    var urc = new Color(0,255,0,255); // upper right corner color: green
-    var llc = new Color(0,0,255,255); // lower left corner color: blue
-    var lrc = new Color(0,0,0,255); // lower right corner color: black
+    /*
+    //var ulc = new Color(0,255,255,255); // upper left corner color: cyan
+    //var urc = new Color(255,0,255,255); // upper right corner color: magenta
+    //var llc = new Color(255,255,0,255); // lower left corner color: yellow
+    //var lrc = new Color(255,192,203,255); // lower right corner color: pink
     var ulx = 50, uly = 50; // upper left corner position
     var urx = 200, ury = 50; // upper right corner position
     var llx = 50, lly = 150; // lower left corner position
@@ -190,6 +191,39 @@ function main() {
         lc.add(lcDelta);
         rc.add(rcDelta);
     } // end vertical
+    */
+
+    // Define a triangle: 3 corner points
+    var topColor   = new Color(0,255,255,255); // top point color: cyan
+    var leftColor  = new Color(255,255,0,255); // bottom-left color: yellow
+    var rightColor = new Color(255,192,203,255); // bottom-right color: pink
+    var topX = 125, topY = 50; // top point position
+    var leftX = 50, leftY = 150; // bottom-left position
+    var rightX = 200, rightY = 150; // bottom-right position
+
+    var totalRows = leftY - topY; // total number of rows in the triangle
+
+    // Go row by row, from the top point down to the base
+    for (var y = topY; y <= leftY; y++) {
+        var t = (y - topY) / totalRows; // 0 = top, 1 = bottom row
+
+        // Find the left and right edge x-position for this row
+        var xLeft  = topX + (leftX  - topX) * t;
+        var xRight = topX + (rightX - topX) * t;
+
+        // Find the color at the left and right edge for this row
+        var colorLeft  = topColor.clone().scale(1-t).add(leftColor.clone().scale(t));
+        var colorRight = topColor.clone().scale(1-t).add(rightColor.clone().scale(t));
+
+        var rowWidth = xRight - xLeft; // width of the current row
+
+        // Fill across this row, blending between the left and right edge colors
+        for (var x = Math.round(xLeft); x <= Math.round(xRight); x++) {
+            var s = (rowWidth === 0) ? 0 : (x - xLeft) / rowWidth;
+            var pixelColor = colorLeft.clone().scale(1-s).add(colorRight.clone().scale(s));
+            drawPixel(imagedata, x, y, pixelColor);
+        } // end row fill
+    } // end rows
     
     context.putImageData(imagedata, 0, 0); // display the image in the context
 }
